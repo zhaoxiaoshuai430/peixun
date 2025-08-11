@@ -15,7 +15,7 @@ class QuizSystem:
         try:
             self.connection = mysql.connector.connect(
                 host=host,
-                port=port,
+                port=int(port),
                 user=user,
                 password=password,
                 database=database,
@@ -104,3 +104,4 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
