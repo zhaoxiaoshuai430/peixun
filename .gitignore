@@ -1,0 +1,25 @@
+# 忽略环境变量文件
+.env
+*.env
+.env.local
+
+# Python 缓存
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Streamlit 缓存
+.streamlit
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 文件
+.DS_Store
+Thumbs.db
