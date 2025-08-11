@@ -1,25 +1,45 @@
-# 忽略环境变量文件
-.env
-*.env
-.env.local
-
-# Python 缓存
-__pycache__
+# ====== Python ======
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-*.so
+env/
+venv/
+.venv/
+virtualenv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Streamlit 缓存
-.streamlit
+# ====== Virtual Environment ======
+.env
+.venv
+env/
+venv/
 
-# IDE 文件
+# ====== IDE & Editors ======
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS 文件
 .DS_Store
 Thumbs.db
+
+# ====== Streamlit ======
+.streamlit/secrets.toml
+
+# ====== Logs ======
+*.log
+logs/
