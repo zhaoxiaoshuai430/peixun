@@ -1,5 +1,6 @@
-streamlit==1.38.0
+# requirements.txt
+streamlit==1.39.0
 mysql-connector-python==8.4.0
 pandas==2.2.2
-
-python-dotenv==1.1.0
+numpy==1.26.4
+python-dotenv  # 可选，如果你以后想本地开发用 .env
