@@ -57,7 +57,7 @@ class QuizSystem:
         """
         try:
             cursor = self.connection.cursor(dictionary=True)
-            query = "SELECT id, title, content FROM question ORDER BY id"
+            query = "SELECT question_id, title, content FROM question ORDER BY id"
             cursor.execute(query)
             result = cursor.fetchall()
             cursor.close()
@@ -104,5 +104,6 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
