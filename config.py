@@ -1,17 +1,21 @@
 # config.py
+import streamlit as st
 import os
-from dotenv import load_dotenv
 
-# 加载本地 .env 文件（仅开发环境）
-load_dotenv()
-
-def DB_CONFIG():
-    return {
-        "host": os.getenv("DB_HOST"),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASSWORD"),
-        "database": os.getenv("DB_NAME")
-    }
-
-def ADMIN_PASSWORD():
-    return os.getenv("ADMIN_PASSWORD")
+# 尝试从 Streamlit Secrets 获取配置
+try:
+    secrets = st.secrets
+    DB_HOST = secrets["DB_HOST"]
+    DB_USER = secrets["DB_USER"]
+    DB_PASSWORD = secrets["DB_PASSWORD"]
+    DB_NAME = secrets["DB_NAME"]
+    DB_PORT = int(secrets["DB_PORT"])
+except Exception as e:
+    # 如果不在 Streamlit 环境中（如本地运行），尝试从 .env 文件加载
+    from dotenv import load_dotenv
+    load_dotenv()
+    DB_HOST = os.getenv("DB_HOST")
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_PORT = int(os.getenv("DB_PORT", 3306))
