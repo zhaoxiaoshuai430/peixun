@@ -11,6 +11,7 @@ class QuizSystem:
         初始化数据库连接
         """
         self.connection = None
+        print(f"Connecting to MySQL server at {host}:{port} with user {user}:{password}")
         try:
             self.connection = mysql.connector.connect(
                 host=host,
@@ -101,4 +102,5 @@ class QuizSystem:
             df = pd.read_sql(query, self.connection)
             return df
         except Error as e:
+
             raise Exception(f"❌ 获取完成情况失败: {e}")
