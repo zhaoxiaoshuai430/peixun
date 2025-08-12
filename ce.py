@@ -244,18 +244,24 @@ def main():
                         daily_stats = filtered_df.groupby("date").size()
                         st.line_chart(daily_stats)
                         st.caption("每日提交趋势")
+        
+                        # 💾 导出功能
+                        if not filtered_df.empty:
+                            export_df = filtered_df.drop(columns=["date"], errors='ignore').copy()  # 使用 copy() 避免警告
     
-                    # 💾 导出功能
-                    if not filtered_df.empty:
-                        csv = filtered_df.drop(columns=["date"], errors='ignore').to_csv(
-                            index=False, encoding='utf-8'
-                        )
-                        st.download_button(
-                            label="📥 导出筛选结果为 CSV",
-                            data=csv,
-                            file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
-                            mime="text/csv"
-                        )
+                            for col in export_df.select_dtypes(include=['object']).columns:
+                                export_df[col] = export_df[col].astype(str)
+                        
+                            csv = export_df.to_csv(index=False, encoding='utf-8-sig', lineterminator='\n')
+    
+                            # 💾 创建下载按钮
+                            st.download_button(
+                                label="📥 导出筛选结果为 CSV",
+                                data=csv,
+                                file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
+                                mime="text/csv",
+                                key="download_csv"  # 避免重复键错误
+                            )
 
             except Exception as e:
                 st.error(f"❌ 获取统计信息失败：{str(e)}")
@@ -270,5 +276,6 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
 
