@@ -4,7 +4,6 @@ from mysql.connector import Error
 import pandas as pd
 import json
 from datetime import datetime
-from pymysql import Error  # 确保导入
 
 
 class QuizSystem:
@@ -111,6 +110,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
