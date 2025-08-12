@@ -2,6 +2,7 @@
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
+import json
 from datetime import datetime
 
 
@@ -80,7 +81,8 @@ class QuizSystem:
                 (user_name, hotel, department, response_data, submit_time) 
                 VALUES (%s, %s, %s, %s, %s)
                 """
-                data = (name, hotel, department, answer, datetime.now())
+                answer_json = json.dumps(answer, ensure_ascii=False)
+                data = (name, hotel, department, answer_json, datetime.now())
                 cursor.execute(insert_query, data)
             cursor.close()
             return True
@@ -104,6 +106,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
