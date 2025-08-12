@@ -105,8 +105,8 @@ class QuizSystem:
         """
         try:
             query = """
-            SELECT DISTINCT name, hotel, department, submit_time 
-            FROM responses 
+            SELECT DISTINCT user_name, hotel, department, submit_time 
+            FROM user_responses 
             ORDER BY submit_time DESC
             """
             df = pd.read_sql(query, self.connection)
@@ -114,6 +114,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
