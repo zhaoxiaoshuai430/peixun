@@ -79,7 +79,7 @@ class QuizSystem:
             with self.connection.cursor() as cursor:
                 insert_query = """
                 INSERT INTO responses 
-                (user_name, hotel, department, answers_json, submit_time) 
+                (user_name, hotel, department, response_data, submit_time) 
                 VALUES (%s, %s, %s, %s, %s)
                 """
                 data = (name, hotel, department, answers_json, datetime.now())
@@ -110,6 +110,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
