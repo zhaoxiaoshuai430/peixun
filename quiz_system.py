@@ -82,7 +82,7 @@ class QuizSystem:
             with self.connection.cursor() as cursor:
                 logging.debug("Executing SQL query...")
                 insert_query = """
-                INSERT INTO responses 
+                INSERT INTO user_responses 
                 (user_name, hotel, department, response_data, submit_time, ip_address) 
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """
@@ -114,6 +114,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
