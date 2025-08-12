@@ -4,6 +4,7 @@ from mysql.connector import Error
 import pandas as pd
 import json
 from datetime import datetime
+from pymysql import Error  # 确保导入
 
 
 class QuizSystem:
@@ -66,7 +67,7 @@ class QuizSystem:
         except Error as e:
             raise Exception(f"❌ 获取题目和答案失败: {e}")
 
-from pymysql import Error  # 确保导入
+
     def save_response(self, name, hotel, department, answers):
         """
         保存用户答题答案（推荐：整份答卷存为一条 JSON 记录）
@@ -110,6 +111,7 @@ from pymysql import Error  # 确保导入
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
