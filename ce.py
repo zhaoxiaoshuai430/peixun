@@ -244,6 +244,8 @@ def main():
                         daily_stats = filtered_df.groupby("date").size()
                         st.line_chart(daily_stats)
                         st.caption("每日提交趋势")
+
+                        st.write("🔍 原始数据预览：", filtered_df.head())
         
                         # 💾 导出功能
                         if not filtered_df.empty:
@@ -276,6 +278,7 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
 
 
