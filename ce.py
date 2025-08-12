@@ -1,4 +1,5 @@
 import streamlit as st
+import json
 from datetime import datetime
 # 假设你有一个 QuizSystem 类，这里只展示调用方式
 # 请确保你已实现 QuizSystem 并能通过 config 连接数据库
@@ -83,11 +84,12 @@ def main():
             if st.button("提交答案", type="primary"):
                 with st.spinner("正在保存..."):
                     try:
+                        answers_json = json.dumps(answers, ensure_ascii=False, indent=2)
                         if quiz_system.save_response(
                             user_info['name'],
                             user_info['hotel'],
                             user_info['department'],
-                            answers
+                            answers_json
                         ):
                             st.success("✅ 答题提交成功！感谢您的参与！")
                             del st.session_state.user_info
@@ -174,4 +176,5 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
