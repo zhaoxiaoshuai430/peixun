@@ -67,9 +67,9 @@ class QuizSystem:
             raise Exception(f"❌ 获取题目和答案失败: {e}")
 
 
-    def save_response(self, name, hotel, department, answers):
+    def save_response(self, name, hotel, department, answers, ip_address=None):
         """
-        保存用户答题答案（推荐：整份答卷存为一条 JSON 记录）
+        保存用户答题答案
         answers: dict, {question_id: user_answer}
         """
         try:
@@ -79,16 +79,16 @@ class QuizSystem:
             with self.connection.cursor() as cursor:
                 insert_query = """
                 INSERT INTO responses 
-                (user_name, hotel, department, response_data, submit_time) 
-                VALUES (%s, %s, %s, %s, %s)
+                (user_name, hotel, department, response_data, submit_time, ip_address) 
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """
-                data = (name, hotel, department, answers_json, datetime.now())
+                data = (name, hotel, department, answers_json, datetime.now(), ip_address)
                 cursor.execute(insert_query, data)
     
-            # ✅ 提交事务
+            # 提交事务
             self.connection.commit()
             return True
-    
+            
         except Error as e:
             print(f"❌ 保存答案失败: {e}")
             self.connection.rollback()  # 回滚
@@ -110,6 +110,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
