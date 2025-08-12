@@ -76,7 +76,7 @@ def main():
 
             answers = {}
             for i, q in enumerate(questions):
-                st.markdown(f"**{i+1}. {q['title']}**")
+                st.markdown(f"**{i+1}. {q['question_text']}**")
                 user_answer = st.text_area(f"你的答案", key=f"answer_{i}")
                 answers[q['id']] = user_answer
 
@@ -174,3 +174,4 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
