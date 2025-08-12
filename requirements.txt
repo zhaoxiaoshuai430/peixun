@@ -3,4 +3,6 @@ streamlit==1.39.0
 mysql-connector-python==8.4.0
 pandas==2.2.2
 numpy==1.26.4
+openpyxl==3.0.10
 python-dotenv  # 可选，如果你以后想本地开发用 .env
+
