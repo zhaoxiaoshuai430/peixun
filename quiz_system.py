@@ -67,16 +67,21 @@ class QuizSystem:
             raise Exception(f"❌ 获取题目和答案失败: {e}")
 
 
+    import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
     def save_response(self, name, hotel, department, answers, ip_address=None):
-        """
-        保存用户答题答案
-        answers: dict, {question_id: user_answer}
-        """
         try:
-            # 将整个答案字典转为 JSON 字符串
+            logging.debug("Checking database connection...")
+            if not self.connection.is_connected():
+                raise Exception("Database connection is not active.")
+            
+            logging.debug("Preparing answers JSON...")
             answers_json = json.dumps(answers, ensure_ascii=False, indent=2)
-    
+        
             with self.connection.cursor() as cursor:
+                logging.debug("Executing SQL query...")
                 insert_query = """
                 INSERT INTO responses 
                 (user_name, hotel, department, response_data, submit_time, ip_address) 
@@ -84,13 +89,13 @@ class QuizSystem:
                 """
                 data = (name, hotel, department, answers_json, datetime.now(), ip_address)
                 cursor.execute(insert_query, data)
-    
-            # 提交事务
+        
+            logging.debug("Committing transaction...")
             self.connection.commit()
             return True
-            
+                
         except Error as e:
-            print(f"❌ 保存答案失败: {e}")
+            logging.error(f"Failed to save response: {e}")
             self.connection.rollback()  # 回滚
             return False
 
@@ -110,6 +115,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
