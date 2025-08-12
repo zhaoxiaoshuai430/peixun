@@ -84,12 +84,11 @@ def main():
             if st.button("提交答案", type="primary"):
                 with st.spinner("正在保存..."):
                     try:
-                        answers_json = json.dumps(answers, ensure_ascii=False, indent=2)
                         if quiz_system.save_response(
                             user_info['name'],
                             user_info['hotel'],
                             user_info['department'],
-                            answers_json
+                            answers
                         ):
                             st.success("✅ 答题提交成功！感谢您的参与！")
                             del st.session_state.user_info
@@ -176,5 +175,6 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
 
