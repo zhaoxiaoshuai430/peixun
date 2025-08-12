@@ -121,135 +121,152 @@ def main():
 
     # ================== ✅ 完成情况模块 ==================
     elif page == "完成情况":
-        st.header("📊 答题完成情况统计")
+    st.header("📊 答题完成情况统计")
 
+    # ✅ 检查是否已通过管理员验证
+    if 'admin_authenticated' not in st.session_state:
+        st.session_state.admin_authenticated = False
+
+    if not st.session_state.admin_authenticated:
         password = st.text_input("请输入管理员密码：", type="password")
-
         if st.button("验证"):
             if password == config["ADMIN_PASSWORD"]:
+                st.session_state.admin_authenticated = True  # ✅ 标记已验证
                 st.success("✅ 验证成功！")
-                try:
-                    df = quiz_system.get_completion_status()
+                st.rerun()  # 刷新页面以进入统计界面
+            else:
+                if password:
+                    st.error("❌ 密码错误！")
+    else:
+        # ✅ 已验证，显示统计内容
+        try:
+            df = quiz_system.get_completion_status()
 
-                    if df.empty:
-                        st.info("📭 暂无用户提交记录")
+            if df.empty:
+                st.info("📭 暂无用户提交记录")
+            else:
+                df["submit_time"] = pd.to_datetime(df["submit_time"])
+
+                # 🔍 筛选控件
+                st.subheader("🔍 筛选条件")
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    selected_hotel = st.selectbox(
+                        "选择酒店",
+                        options=["全部"] + sorted(df["hotel"].unique().tolist()),
+                        key="selected_hotel"  # ✅ 添加 key 保持状态
+                    )
+                with col2:
+                    # 动态更新部门选项
+                    if selected_hotel == "全部":
+                        dept_options = df["department"].unique().tolist()
                     else:
-                        # ✅ 确保 submit_time 是 datetime 类型
-                        df["submit_time"] = pd.to_datetime(df["submit_time"])
+                        dept_options = df[df["hotel"] == selected_hotel]["department"].unique().tolist()
+                    selected_department = st.selectbox(
+                        "选择部门",
+                        options=["全部"] + sorted(dept_options),
+                        key="selected_department"  # ✅ 添加 key 保持状态
+                    )
+                with col3:
+                    name_search = st.text_input(
+                        "搜索姓名（支持模糊）",
+                        value="",
+                        key="name_search"  # ✅ 添加 key 保持状态
+                    ).strip()
 
-                        # 🔍 筛选控件（侧边栏或页面顶部）
-                        st.subheader("🔍 筛选条件")
-                        col1, col2, col3 = st.columns(3)
+                # 📅 时间范围筛选
+                st.markdown("📅 提交时间范围")
+                min_time = df["submit_time"].min().date()
+                max_time = df["submit_time"].max().date()
+                start_date, end_date = st.date_input(
+                    "选择时间区间",
+                    value=[min_time, max_time],
+                    min_value=min_time,
+                    max_value=max_time,
+                    key="date_range"  # ✅ 添加 key 保持状态
+                )
 
-                        with col1:
-                            selected_hotel = st.selectbox(
-                                "选择酒店",
-                                options=["全部"] + sorted(df["hotel"].unique().tolist())
+                # 🔎 应用筛选
+                filtered_df = df.copy()
+
+                if selected_hotel != "全部":
+                    filtered_df = filtered_df[filtered_df["hotel"] == selected_hotel]
+
+                if selected_department != "全部":
+                    filtered_df = filtered_df[filtered_df["department"] == selected_department]
+
+                if name_search:
+                    filtered_df = filtered_df[
+                        filtered_df["name"].str.contains(name_search, case=False, na=False)
+                    ]
+
+                if start_date and end_date:
+                    mask = (
+                        (filtered_df["submit_time"].dt.date >= start_date) &
+                        (filtered_df["submit_time"].dt.date <= end_date)
+                    )
+                    filtered_df = filtered_df[mask]
+
+                # 📊 显示结果
+                st.subheader(f"📋 查询结果（共 {len(filtered_df)} 人）")
+
+                if filtered_df.empty:
+                    st.warning("⚠️ 当前筛选条件下无数据")
+                else:
+                    # ✅ 显示数据表格
+                    st.dataframe(
+                        filtered_df,
+                        column_config={
+                            "submit_time": st.column_config.DatetimeColumn(
+                                "提交时间", format="YYYY-MM-DD HH:mm:ss"
                             )
-                        with col2:
-                            # 动态更新部门列表（基于酒店）
-                            if selected_hotel == "全部":
-                                dept_options = df["department"].unique().tolist()
-                            else:
-                                dept_options = df[df["hotel"] == selected_hotel]["department"].unique().tolist()
-                            selected_department = st.selectbox(
-                                "选择部门",
-                                options=["全部"] + sorted(dept_options)
-                            )
-                        with col3:
-                            name_search = st.text_input("搜索姓名（支持模糊）", "").strip()
+                        },
+                        hide_index=True,
+                        use_container_width=True
+                    )
 
-                        # 📅 时间范围筛选
-                        st.markdown("📅 提交时间范围")
-                        min_time = df["submit_time"].min().date()
-                        max_time = df["submit_time"].max().date()
-                        start_date, end_date = st.date_input(
-                            "选择时间区间",
-                            value=[min_time, max_time],
-                            min_value=min_time,
-                            max_value=max_time
-                        )
+                    # 📈 统计图表
+                    st.subheader("📊 数据分析")
 
-                        # 🔎 应用筛选
-                        filtered_df = df.copy()
+                    if selected_hotel == "全部":
+                        hotel_stats = filtered_df["hotel"].value_counts()
+                        st.bar_chart(hotel_stats, height=300)
+                        st.caption("各酒店参与人数")
 
-                        if selected_hotel != "全部":
-                            filtered_df = filtered_df[filtered_df["hotel"] == selected_hotel]
+                    if selected_department == "全部":
+                        dept_stats = filtered_df["department"].value_counts()
+                        st.bar_chart(dept_stats, height=250)
+                        st.caption("各部门参与人数")
 
-                        if selected_department != "全部":
-                            filtered_df = filtered_df[filtered_df["department"] == selected_department]
+                    # 📅 时间趋势图
+                    filtered_df["date"] = filtered_df["submit_time"].dt.date
+                    daily_stats = filtered_df.groupby("date").size()
+                    st.line_chart(daily_stats)
+                    st.caption("每日提交趋势")
 
-                        if name_search:
-                            filtered_df = filtered_df[
-                                filtered_df["name"].str.contains(name_search, case=False, na=False)
-                            ]
+                # 💾 导出功能
+                if not filtered_df.empty:
+                    csv = filtered_df.drop(columns=["date"], errors='ignore').to_csv(
+                        index=False, encoding='utf-8-sig'
+                    )
+                    st.download_button(
+                        label="📥 导出筛选结果为 CSV",
+                        data=csv,
+                        file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv"
+                    )
 
-                        # 时间筛选
-                        if start_date and end_date:
-                            mask = (
-                                (filtered_df["submit_time"].dt.date >= start_date) &
-                                (filtered_df["submit_time"].dt.date <= end_date)
-                            )
-                            filtered_df = filtered_df[mask]
+        except Exception as e:
+            st.error(f"❌ 获取统计信息失败：{str(e)}")
+            st.exception(e)
 
-                        # 📊 显示结果
-                        st.subheader(f"📋 查询结果（共 {len(filtered_df)} 人）")
-
-                        if filtered_df.empty:
-                            st.warning("⚠️ 当前筛选条件下无数据")
-                        else:
-                            # ✅ 显示数据表格
-                            st.dataframe(
-                                filtered_df,
-                                column_config={
-                                    "submit_time": st.column_config.DatetimeColumn(
-                                        "提交时间", format="YYYY-MM-DD HH:mm:ss"
-                                    )
-                                },
-                                hide_index=True,
-                                use_container_width=True
-                            )
-
-                            # 📈 统计图表
-                            st.subheader("📊 数据分析")
-
-                            # 按酒店统计（仅在未筛选酒店时显示）
-                            if selected_hotel == "全部":
-                                hotel_stats = filtered_df["hotel"].value_counts()
-                                st.bar_chart(hotel_stats, height=300)
-                                st.caption("各酒店参与人数")
-
-                            # 按部门统计
-                            if selected_department == "全部":
-                                dept_stats = filtered_df["department"].value_counts()
-                                st.bar_chart(dept_stats, height=250)
-                                st.caption("各部门参与人数")
-
-                            # 📅 时间趋势图
-                            filtered_df["date"] = filtered_df["submit_time"].dt.date
-                            daily_stats = filtered_df.groupby("date").size()
-                            st.line_chart(daily_stats)
-                            st.caption("每日提交趋势")
-
-                        # 💾 导出功能
-                        if not filtered_df.empty:
-                            csv = filtered_df.drop(columns=["date"], errors='ignore').to_csv(
-                                index=False, encoding='utf-8-sig'
-                            )
-                            st.download_button(
-                                label="📥 导出筛选结果为 CSV",
-                                data=csv,
-                                file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
-                                mime="text/csv"
-                            )
-
-                except Exception as e:
-                    st.error(f"❌ 获取统计信息失败：{str(e)}")
-                    st.exception(e)  # 可选：显示详细错误（仅开发时）
-            elif password:
-                st.error("❌ 密码错误！")
-
+        # ✅ 添加退出按钮（可选）
+        if st.button("退出管理员模式"):
+            del st.session_state.admin_authenticated
+            st.rerun()
 
 # 运行主程序
 if __name__ == "__main__":
     main()
+
