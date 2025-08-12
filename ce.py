@@ -247,23 +247,22 @@ def main():
                         st.caption("每日提交趋势")
         
                         # 💾 导出功能
-                        # 将 DataFrame 导出为 Excel
-                        def to_excel(df):
-                            output = BytesIO()
-                            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                                df.to_excel(writer, index=False, sheet_name='筛选结果')
-                            return output.getvalue()
+                        if not filtered_df.empty:
+                            export_df = filtered_df.drop(columns=["date"], errors='ignore').copy()  # 使用 copy() 避免警告
     
-                        # 💾 创建下载按钮
-                        excel_data = to_excel(export_df)
+                            for col in export_df.select_dtypes(include=['object']).columns:
+                                export_df[col] = export_df[col].astype(str)
                         
-                        st.download_button(
-                            label="📥 导出筛选结果为 Excel",
-                            data=excel_data,
-                            file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            key="download_excel"
-                        )
+                            csv = export_df.to_csv(index=False, encoding='utf-8-sig', lineterminator='\n')
+    
+                            # 💾 创建下载按钮
+                            st.download_button(
+                                label="📥 导出筛选结果为 CSV",
+                                data=csv,
+                                file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
+                                mime="text/csv",
+                                key="download_csv"  # 避免重复键错误
+                            )
 
             except Exception as e:
                 st.error(f"❌ 获取统计信息失败：{str(e)}")
@@ -278,6 +277,7 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
 
 
