@@ -5,6 +5,7 @@ from datetime import datetime
 from quiz_system import QuizSystem  # 请根据你的实际模块名调整
 from config import config  # 导入配置
 
+
 def main():
     st.set_page_config(
         page_title="在线答题系统",
@@ -32,68 +33,69 @@ def main():
     page = st.sidebar.radio("导航", ["答题模块", "学习模块", "完成情况"])
 
     # ================== ✅ 答题模块 ==================
-   if page == "答题模块":
-    st.header("📝 答题模块")
+    if page == "答题模块":
+        st.header("📝 答题模块")
 
-    if 'user_info' not in st.session_state:
-        with st.form("user_info_form"):
-            st.subheader("请填写基本信息")
-            name = st.text_input("姓名")
-            hotel = st.selectbox(
-                "酒店",
-                ["中油花园酒店", "华智酒店", "华丰来旺达酒店", "来旺达商旅酒店", "开封来旺达酒店", "新乡来旺达轻居酒店"]
-            )
-            # ✅ 修正：使用 selectbox 让用户选择部门
-            department = st.selectbox(
-                "部门",
-                ["总经理办公室", "房务部", "餐饮部", "财务部", 
-                 "工保部", "行政人事部", "市场经营部", "人力资源部", "汉风物业"]
-            )
+        if 'user_info' not in st.session_state:
+            with st.form("user_info_form"):
+                st.subheader("请填写基本信息")
+                name = st.text_input("姓名")
+                hotel = st.selectbox(
+                    "酒店",
+                    ["中油花园酒店", "华智酒店", "华丰来旺达酒店", "来旺达商旅酒店", "开封来旺达酒店", "新乡来旺达轻居酒店"]
+                )
+                # ✅ 修正：使用 selectbox 让用户选择部门
+                department = st.selectbox(
+                    "部门",
+                    ["总经理办公室", "房务部", "餐饮部", "财务部", 
+                     "工保部", "行政人事部", "市场经营部", "人力资源部", "汉风物业"]
+                )
 
-            # ✅ 提交按钮必须在 form 内部
-            submitted = st.form_submit_button("开始答题")
+                # ✅ 提交按钮必须在 form 内部
+                submitted = st.form_submit_button("开始答题")
 
-            if submitted:
-                if not name.strip() or not department:
-                    st.error("请填写姓名和选择部门！")
-                else:
-                    st.session_state.user_info = {
-                        "name": name.strip(),
-                        "hotel": hotel,
-                        "department": department
-                    }
-                    st.rerun()
-
-    else:
-        user_info = st.session_state.user_info
-        st.success(f"欢迎 {user_info['name']}，来自 {user_info['hotel']} {user_info['department']}！")
-
-        questions = quiz_system.fetch_questions_for_quiz()  # 假设这个方法存在
-        if not questions:
-            st.warning("暂无题目，请联系管理员。")
-            return
-
-        answers = {}
-        for i, q in enumerate(questions):
-            st.markdown(f"**{i+1}. {q['title']}**")
-            user_answer = st.text_area(f"你的答案", key=f"answer_{i}")
-            answers[q['id']] = user_answer
-
-        if st.button("提交答案", type="primary"):
-            with st.spinner("正在保存..."):
-                try:
-                    if quiz_system.save_response(
-                        user_info['name'],
-                        user_info['hotel'],
-                        user_info['department'],
-                        answers
-                    ):
-                        st.success("✅ 答题提交成功！感谢您的参与！")
-                        del st.session_state.user_info
+                if submitted:
+                    if not name.strip() or not department:
+                        st.error("请填写姓名和选择部门！")
                     else:
-                        st.error("❌ 提交失败，请重试。")
-                except Exception as e:
-                    st.error(f"❌ 保存失败：{str(e)}")
+                        st.session_state.user_info = {
+                            "name": name.strip(),
+                            "hotel": hotel,
+                            "department": department
+                        }
+                        st.rerun()
+
+        else:
+            user_info = st.session_state.user_info
+            st.success(f"欢迎 {user_info['name']}，来自 {user_info['hotel']} {user_info['department']}！")
+
+            questions = quiz_system.fetch_questions_for_quiz()  # 假设这个方法存在
+            if not questions:
+                st.warning("暂无题目，请联系管理员。")
+                return
+
+            answers = {}
+            for i, q in enumerate(questions):
+                st.markdown(f"**{i+1}. {q['title']}**")
+                user_answer = st.text_area(f"你的答案", key=f"answer_{i}")
+                answers[q['id']] = user_answer
+
+            if st.button("提交答案", type="primary"):
+                with st.spinner("正在保存..."):
+                    try:
+                        if quiz_system.save_response(
+                            user_info['name'],
+                            user_info['hotel'],
+                            user_info['department'],
+                            answers
+                        ):
+                            st.success("✅ 答题提交成功！感谢您的参与！")
+                            del st.session_state.user_info
+                        else:
+                            st.error("❌ 提交失败，请重试。")
+                    except Exception as e:
+                        st.error(f"❌ 保存失败：{str(e)}")
+
     # ================== ✅ 学习模块 ==================
     elif page == "学习模块":
         st.header("📘 学习模块")
@@ -168,8 +170,7 @@ def main():
             elif password:
                 st.error("❌ 密码错误！")
 
+
 # 运行主程序
 if __name__ == "__main__":
     main()
-
-
