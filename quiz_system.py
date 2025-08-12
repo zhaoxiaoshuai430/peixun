@@ -77,10 +77,10 @@ class QuizSystem:
                 # 插入每道题的答案
                 insert_query = """
                 INSERT INTO responses 
-                (name, hotel, department, question_id, answer, submit_time) 
-                VALUES (%s, %s, %s, %s, %s, %s)
+                (user_name, hotel, department, response_data, submit_time) 
+                VALUES (%s, %s, %s, %s, %s)
                 """
-                data = (name, hotel, department, q_id, answer, datetime.now())
+                data = (name, hotel, department, answer, datetime.now())
                 cursor.execute(insert_query, data)
             cursor.close()
             return True
@@ -104,6 +104,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
