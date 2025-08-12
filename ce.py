@@ -39,8 +39,8 @@ def main():
             with st.form("user_info_form"):
                 st.subheader("请填写基本信息")
                 name = st.text_input("姓名")
-                hotel = st.selectbox("酒店", ["北京酒店", "上海酒店", "广州酒店", "深圳酒店"])  # 示例
-                department = st.text_input("部门")
+                hotel = st.selectbox("酒店", ["中油花园酒店", "华智酒店", "华丰来旺达酒店", "来旺达商旅酒店","开封来旺达酒店","新乡来旺达轻居酒店"])  # 示例
+                department = st.text_input("总经理办公室","房务部","餐饮部","财务部","工保部","行政人事部","市场经营部","人力资源部","汉风物业")
 
                 submitted = st.form_submit_button("开始答题")
                 if submitted:
@@ -162,3 +162,4 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
