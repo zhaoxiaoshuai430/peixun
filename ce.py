@@ -122,11 +122,11 @@ def main():
     # ================== ✅ 完成情况模块 ==================
     elif page == "完成情况":
         st.header("📊 答题完成情况统计")
-
+    
         # ✅ 检查是否已通过管理员验证
         if 'admin_authenticated' not in st.session_state:
             st.session_state.admin_authenticated = False
-
+    
         if not st.session_state.admin_authenticated:
             password = st.text_input("请输入管理员密码：", type="password")
             if st.button("验证"):
@@ -141,16 +141,16 @@ def main():
             # ✅ 已验证，显示统计内容
             try:
                 df = quiz_system.get_completion_status()
-
+    
                 if df.empty:
                     st.info("📭 暂无用户提交记录")
                 else:
                     df["submit_time"] = pd.to_datetime(df["submit_time"])
-
+    
                     # 🔍 筛选控件
                     st.subheader("🔍 筛选条件")
                     col1, col2, col3 = st.columns(3)
-
+    
                     with col1:
                         selected_hotel = st.selectbox(
                             "选择酒店",
@@ -174,7 +174,7 @@ def main():
                             value="",
                             key="name_search"  # ✅ 添加 key 保持状态
                         ).strip()
-
+    
                     # 📅 时间范围筛选
                     st.markdown("📅 提交时间范围")
                     min_time = df["submit_time"].min().date()
@@ -186,31 +186,31 @@ def main():
                         max_value=max_time,
                         key="date_range"  # ✅ 添加 key 保持状态
                     )
-
+    
                     # 🔎 应用筛选
                     filtered_df = df.copy()
-
+    
                     if selected_hotel != "全部":
                         filtered_df = filtered_df[filtered_df["hotel"] == selected_hotel]
-
+    
                     if selected_department != "全部":
                         filtered_df = filtered_df[filtered_df["department"] == selected_department]
-
+    
                     if name_search:
                         filtered_df = filtered_df[
                             filtered_df["user_name"].str.contains(name_search, case=False, na=False)
                         ]
-
+    
                     if start_date and end_date:
                         mask = (
                             (filtered_df["submit_time"].dt.date >= start_date) &
                             (filtered_df["submit_time"].dt.date <= end_date)
                         )
                         filtered_df = filtered_df[mask]
-
+    
                     # 📊 显示结果
                     st.subheader(f"📋 查询结果（共 {len(filtered_df)} 人）")
-
+    
                     if filtered_df.empty:
                         st.warning("⚠️ 当前筛选条件下无数据")
                     else:
@@ -225,30 +225,30 @@ def main():
                             hide_index=True,
                             use_container_width=True
                         )
-
+    
                         # 📈 统计图表
                         st.subheader("📊 数据分析")
-
+    
                         if selected_hotel == "全部":
                             hotel_stats = filtered_df["hotel"].value_counts()
                             st.bar_chart(hotel_stats, height=300)
                             st.caption("各酒店参与人数")
-
+    
                         if selected_department == "全部":
                             dept_stats = filtered_df["department"].value_counts()
                             st.bar_chart(dept_stats, height=250)
                             st.caption("各部门参与人数")
-
+    
                         # 📅 时间趋势图
                         filtered_df["date"] = filtered_df["submit_time"].dt.date
                         daily_stats = filtered_df.groupby("date").size()
                         st.line_chart(daily_stats)
                         st.caption("每日提交趋势")
-
+    
                     # 💾 导出功能
                     if not filtered_df.empty:
                         csv = filtered_df.drop(columns=["date"], errors='ignore').to_csv(
-                            index=False, encoding='utf-8-sig'
+                            index=False, encoding='utf-8'
                         )
                         st.download_button(
                             label="📥 导出筛选结果为 CSV",
@@ -270,4 +270,5 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
