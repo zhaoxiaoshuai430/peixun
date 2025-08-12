@@ -4,7 +4,7 @@ from mysql.connector import Error
 import pandas as pd
 import json
 from datetime import datetime
-
+import logging
 
 class QuizSystem:
     def __init__(self, host, user, password, database, port=3306):
@@ -67,10 +67,9 @@ class QuizSystem:
             raise Exception(f"❌ 获取题目和答案失败: {e}")
 
 
-    import logging
+    
 
-logging.basicConfig(level=logging.DEBUG)
-
+    logging.basicConfig(level=logging.DEBUG)
     def save_response(self, name, hotel, department, answers, ip_address=None):
         try:
             logging.debug("Checking database connection...")
@@ -115,6 +114,7 @@ logging.basicConfig(level=logging.DEBUG)
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
