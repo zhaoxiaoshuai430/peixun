@@ -198,7 +198,7 @@ def main():
 
                     if name_search:
                         filtered_df = filtered_df[
-                            filtered_df["name"].str.contains(name_search, case=False, na=False)
+                            filtered_df["user_name"].str.contains(name_search, case=False, na=False)
                         ]
 
                     if start_date and end_date:
@@ -270,3 +270,4 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
