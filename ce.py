@@ -248,20 +248,30 @@ def main():
         
                         # 💾 导出功能
                         if not filtered_df.empty:
+                            # 准备导出数据
                             export_df = filtered_df.drop(columns=["date"], errors='ignore').copy()  # 使用 copy() 避免警告
-    
+                        
+                            # 确保所有 object 类型列转换为字符串（防止 Excel 写入问题）
                             for col in export_df.select_dtypes(include=['object']).columns:
                                 export_df[col] = export_df[col].astype(str)
                         
-                            csv = export_df.to_csv(index=False, encoding='utf-8-sig', lineterminator='\n')
-    
-                            # 💾 创建下载按钮
+                            # ✅ 新增：定义一个函数，将 DataFrame 转换为 Excel 格式的字节数据
+                            def to_excel(df):
+                                output = BytesIO()  # 创建一个内存缓冲区
+                                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                                    df.to_excel(writer, index=False, sheet_name='筛选结果')
+                                return output.getvalue()  # 返回字节数据
+                        
+                            # ✅ 将 DataFrame 转换为 Excel 字节数据
+                            excel_data = to_excel(export_df)
+                        
+                            # 💾 创建下载按钮（导出为 Excel）
                             st.download_button(
-                                label="📥 导出筛选结果为 CSV",
-                                data=csv,
-                                file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.csv",
-                                mime="text/csv",
-                                key="download_csv"  # 避免重复键错误
+                                label="📥 导出筛选结果为 Excel",
+                                data=excel_data,
+                                file_name=f"答题记录_筛选结果_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                key="download_excel"  # 注意：key 也要改，避免与旧的 CSV 按钮冲突
                             )
 
             except Exception as e:
@@ -277,6 +287,7 @@ def main():
 # 运行主程序
 if __name__ == "__main__":
     main()
+
 
 
 
