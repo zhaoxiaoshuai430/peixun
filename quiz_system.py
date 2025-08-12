@@ -66,28 +66,32 @@ class QuizSystem:
         except Error as e:
             raise Exception(f"❌ 获取题目和答案失败: {e}")
 
+from pymysql import Error  # 确保导入
     def save_response(self, name, hotel, department, answers):
         """
-        保存用户答题答案
+        保存用户答题答案（推荐：整份答卷存为一条 JSON 记录）
         answers: dict, {question_id: user_answer}
-        假设答案表名为: responses
         """
         try:
-            cursor = self.connection.cursor()
-            for q_id, answer in answers.items():
-                # 插入每道题的答案
+            # 将整个答案字典转为 JSON 字符串
+            answers_json = json.dumps(answers, ensure_ascii=False, indent=2)
+    
+            with self.connection.cursor() as cursor:
                 insert_query = """
                 INSERT INTO responses 
-                (user_name, hotel, department, response_data, submit_time) 
+                (user_name, hotel, department, answers_json, submit_time) 
                 VALUES (%s, %s, %s, %s, %s)
                 """
-                answer_json = json.dumps(answer, ensure_ascii=False)
-                data = (name, hotel, department, answer_json, datetime.now())
+                data = (name, hotel, department, answers_json, datetime.now())
                 cursor.execute(insert_query, data)
-            cursor.close()
+    
+            # ✅ 提交事务
+            self.connection.commit()
             return True
+    
         except Error as e:
             print(f"❌ 保存答案失败: {e}")
+            self.connection.rollback()  # 回滚
             return False
 
     def get_completion_status(self):
@@ -106,6 +110,7 @@ class QuizSystem:
         except Error as e:
 
             raise Exception(f"❌ 获取完成情况失败: {e}")
+
 
 
 
